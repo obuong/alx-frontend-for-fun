@@ -38,6 +38,17 @@ html_content = re.sub(r'^\s*<h[1-6]>', r'\n<\g<0>', html_content, flags=re.MULTI
 html_content = re.sub(r'</h[1-6]>\s*$', r'\g<0>\n', html_content, flags=re.MULTILINE)
 html_content = re.sub(r'(?<=</ol>)\s*$', r'\n', html_content)
 
+# Parse paragraph syntax and generate HTML
+html_content = re.sub(r'(?<!</p>)\n\n(?!\s*<)', r'</p>\n<p>', html_content)
+html_content = re.sub(r'(?<=<p>)\s+', '', html_content)
+html_content = re.sub(r'\s+(?=</p>)', '', html_content)
+html_content = re.sub(r'(?<!<p>)\n(?!\s*<)', r'<br/>\n', html_content)
+html_content = re.sub(r'(?<=</h[1-6]>)(.*)(?=\n<p>)', r'\1\n', html_content, flags=re.DOTALL)
+html_content = re.sub(r'(?<=</p>)(.*)(?=<h[1-6]>)', r'\n\1', html_content, flags=re.DOTALL)
+html_content = re.sub(r'^\s*<h[1-6]>', r'\n<\g<0>', html_content, flags=re.MULTILINE)
+html_content = re.sub(r'</h[1-6]>\s*$', r'\g<0>\n', html_content, flags=re.MULTILINE)
+html_content = re.sub(r'(?<=</p>)\s*$', r'\n', html_content)
+
 # Write HTML content to the output file
 with open(output_file, 'w') as file:
     file.write(html_content)
