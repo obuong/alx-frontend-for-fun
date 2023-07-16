@@ -30,6 +30,14 @@ html_content = re.sub(r'^\s*<h[1-6]>', r'\n<\g<0>', html_content, flags=re.MULTI
 html_content = re.sub(r'</h[1-6]>\s*$', r'\g<0>\n', html_content, flags=re.MULTILINE)
 html_content = re.sub(r'(?<=</ul>)\s*$', r'\n', html_content)
 
+# Parse ordered listing syntax and generate HTML
+html_content = re.sub(r'^\*\s+(.+)$', r'<li>\1</li>', html_content, flags=re.MULTILINE)
+html_content = re.sub(r'(?<=</h[1-6]>)(.*)(?=\n<ol>)', r'\1\n', html_content, flags=re.DOTALL)
+html_content = re.sub(r'(?<=</ol>)(.*)(?=<h[1-6]>)', r'\n\1', html_content, flags=re.DOTALL)
+html_content = re.sub(r'^\s*<h[1-6]>', r'\n<\g<0>', html_content, flags=re.MULTILINE)
+html_content = re.sub(r'</h[1-6]>\s*$', r'\g<0>\n', html_content, flags=re.MULTILINE)
+html_content = re.sub(r'(?<=</ol>)\s*$', r'\n', html_content)
+
 # Write HTML content to the output file
 with open(output_file, 'w') as file:
     file.write(html_content)
