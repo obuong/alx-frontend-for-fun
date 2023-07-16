@@ -1,56 +1,31 @@
 #!/usr/bin/python3
+"""
+Markdown to HTML Converter
+"""
 
 import sys
 import os.path
-import re
+import markdown
 
-if len(sys.argv) < 3:
-    sys.stderr.write("Usage: ./markdown2html.py README.md README.html\n")
-    sys.exit(1)
+def convert_markdown_to_html(markdown_file, output_file):
+    if not os.path.isfile(markdown_file):
+        print(f"Missing {markdown_file}", file=sys.stderr)
+        sys.exit(1)
 
-markdown_file = sys.argv[1]
-output_file = sys.argv[2]
+    with open(markdown_file, 'r') as file:
+        markdown_content = file.read()
+        html_content = markdown.markdown(markdown_content)
 
-if not os.path.isfile(markdown_file):
-    sys.stderr.write(f"Missing {markdown_file}\n")
-    sys.exit(1)
+    with open(output_file, 'w') as file:
+        file.write(html_content)
 
-# Read the Markdown file
-with open(markdown_file, 'r') as file:
-    markdown_content = file.read()
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: ./markdown2html.py <input_file> <output_file>", file=sys.stderr)
+        sys.exit(1)
 
-# Parse headings syntax and generate HTML
-html_content = re.sub(r'^(#{1,6})\s+(.+)$', r'<\1>\2</\1>', markdown_content, flags=re.MULTILINE)
+    markdown_file = sys.argv[1]
+    output_file = sys.argv[2]
+    convert_markdown_to_html(markdown_file, output_file)
 
-# Parse unordered listing syntax and generate HTML
-html_content = re.sub(r'^-\s+(.+)$', r'<li>\1</li>', html_content, flags=re.MULTILINE)
-html_content = re.sub(r'(?<=</h[1-6]>)(.*)(?=\n<ul>)', r'\1\n', html_content, flags=re.DOTALL)
-html_content = re.sub(r'(?<=</ul>)(.*)(?=<h[1-6]>)', r'\n\1', html_content, flags=re.DOTALL)
-html_content = re.sub(r'^\s*<h[1-6]>', r'\n<\g<0>', html_content, flags=re.MULTILINE)
-html_content = re.sub(r'</h[1-6]>\s*$', r'\g<0>\n', html_content, flags=re.MULTILINE)
-html_content = re.sub(r'(?<=</ul>)\s*$', r'\n', html_content)
-
-# Parse ordered listing syntax and generate HTML
-html_content = re.sub(r'^\*\s+(.+)$', r'<li>\1</li>', html_content, flags=re.MULTILINE)
-html_content = re.sub(r'(?<=</h[1-6]>)(.*)(?=\n<ol>)', r'\1\n', html_content, flags=re.DOTALL)
-html_content = re.sub(r'(?<=</ol>)(.*)(?=<h[1-6]>)', r'\n\1', html_content, flags=re.DOTALL)
-html_content = re.sub(r'^\s*<h[1-6]>', r'\n<\g<0>', html_content, flags=re.MULTILINE)
-html_content = re.sub(r'</h[1-6]>\s*$', r'\g<0>\n', html_content, flags=re.MULTILINE)
-html_content = re.sub(r'(?<=</ol>)\s*$', r'\n', html_content)
-
-# Parse paragraph syntax and generate HTML
-html_content = re.sub(r'(?<!</p>)\n\n(?!\s*<)', r'</p>\n<p>', html_content)
-html_content = re.sub(r'(?<=<p>)\s+', '', html_content)
-html_content = re.sub(r'\s+(?=</p>)', '', html_content)
-html_content = re.sub(r'(?<!<p>)\n(?!\s*<)', r'<br/>\n', html_content)
-html_content = re.sub(r'(?<=</h[1-6]>)(.*)(?=\n<p>)', r'\1\n', html_content, flags=re.DOTALL)
-html_content = re.sub(r'(?<=</p>)(.*)(?=<h[1-6]>)', r'\n\1', html_content, flags=re.DOTALL)
-html_content = re.sub(r'^\s*<h[1-6]>', r'\n<\g<0>', html_content, flags=re.MULTILINE)
-html_content = re.sub(r'</h[1-6]>\s*$', r'\g<0>\n', html_content, flags=re.MULTILINE)
-html_content = re.sub(r'(?<=</p>)\s*$', r'\n', html_content)
-
-# Write HTML content to the output file
-with open(output_file, 'w') as file:
-    file.write(html_content)
-
-sys.exit(0)
+    sys.exit(0)
